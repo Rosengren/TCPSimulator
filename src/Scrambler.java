@@ -3,30 +3,28 @@ import java.util.*;
 
 public class Scrambler extends Thread {
 
-    private  static final int DEFAULT_PORT = 2015;
-    private  static final int DEFAULT_SERVER_PORT = 2000;
 
     private int serverPort;
+    private int clientPort;
 
     private Random rand;
-
-    private int port;
     private String message;
 
-    public Scrambler() {
-        serverPort = DEFAULT_SERVER_PORT;
-        port = DEFAULT_PORT;
+    public Scrambler(int clientPort, int serverPort) {
+
+        this.clientPort = clientPort;
+        this.serverPort = serverPort;
         message = "";
         rand = new Random();
 
     }
 
-    public void setServerPort(int serverPort) {
-        this.serverPort = serverPort;
+    public void setServerPort(int port) {
+        serverPort = port;
     }
 
-    public void setPortNumber(int portNumber) {
-        port = portNumber;
+    public void setClientPort(int port) {
+        clientPort = port;
     }
 
     public void listen() {
@@ -68,12 +66,13 @@ public class Scrambler extends Thread {
     public void run() {
 
         try {
-
-            DatagramSocket mySocket = new DatagramSocket(port);
+            // TODO: add another socket to listen for messages from the server
+            DatagramSocket mySocket = new DatagramSocket(clientPort);
 
             byte[] buffer = new byte[1024];
 
             while(true) {
+
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 mySocket.receive(packet);
 

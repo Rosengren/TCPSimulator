@@ -1,14 +1,11 @@
 import java.net.*;
-import java.util.*;
 
 public class Server extends Thread {
 
-    private static final int DEFAULT_PORT_NUMBER = 2000;
+    int clientPort;
 
-    int port;
-
-    public Server() {
-        port = DEFAULT_PORT_NUMBER;
+    public Server(int clientPort) {
+        this.clientPort = clientPort;
     }
 
     public void listen() {
@@ -20,7 +17,7 @@ public class Server extends Thread {
 
         try {
 
-            DatagramSocket mySocket = new DatagramSocket(port);
+            DatagramSocket mySocket = new DatagramSocket(clientPort);
 
             byte[] buffer = new byte[1024];
 

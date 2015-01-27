@@ -2,28 +2,18 @@ import java.net.*;
 
 public class Client extends Thread {
 
-    private static final int DEFAULT_PORT = 2015;
-    private static final int DEFAULT_NUMBER_OF_MESSAGES = 10;
-    private static final String DEFAULT_MESSAGE = "Hello";
-
     private int port;
-    private int numOfMessages;
-    private String message;
 
-    public Client() {
-        port = DEFAULT_PORT;
-        message = DEFAULT_MESSAGE;
-        numOfMessages = DEFAULT_NUMBER_OF_MESSAGES;
+    public Client(int portNumber) {
+        port = portNumber;
     }
 
     public void setPortNumber(int portNumber) {
         port = portNumber;
     }
-    public void setMessage(String msg) {
-        message = msg;
-    }
 
-    public void sendSingleMessage() {
+
+    public void sendSingleMessage(String message) {
 
         try {
 
@@ -39,18 +29,12 @@ public class Client extends Thread {
 
     }
 
-    public void sendMultipleMessages(int numberOfMessages) {
-        start(); // call run method
-    }
-
-    @Override
-    public void run() {
+    public void sendMultipleMessages(int numberOfMessages, String msg) {
 
         try {
 
             int i = 0;
-            while (i < numOfMessages) {
-                String msg = "Hello";
+            while (i < numberOfMessages) {
 
                 DatagramSocket mySocket = new DatagramSocket();
                 byte[] message = msg.getBytes();
@@ -64,9 +48,8 @@ public class Client extends Thread {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
     }
+
 }
 
 
