@@ -23,7 +23,7 @@ public class Client extends Thread {
         message = msg;
     }
 
-    public void sendMessage() {
+    public void sendSingleMessage() {
 
         try {
 
@@ -40,7 +40,7 @@ public class Client extends Thread {
     }
 
     public void sendMultipleMessages(int numberOfMessages) {
-        start();
+        start(); // call run method
     }
 
     @Override

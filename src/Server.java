@@ -3,12 +3,16 @@ import java.util.*;
 
 public class Server extends Thread {
 
-    private static final int DEFAULT_PORT_NUMBER = 1000;
+    private static final int DEFAULT_PORT_NUMBER = 2000;
 
     int port;
 
     public Server() {
         port = DEFAULT_PORT_NUMBER;
+    }
+
+    public void listen() {
+        start();
     }
 
     @Override

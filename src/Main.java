@@ -12,7 +12,8 @@ public class Main {
         client = new Client();
 
         scrambler.listen();
-        client.sendMessage();
+        server.listen();
+        client.sendSingleMessage();
     }
 }
 

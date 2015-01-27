@@ -4,9 +4,9 @@ import java.util.*;
 public class Scrambler extends Thread {
 
     private  static final int DEFAULT_PORT = 2015;
+    private  static final int DEFAULT_SERVER_PORT = 2000;
 
-    private ArrayList<Server> servers;
-    private ArrayList<Client> clients;
+    private int serverPort;
 
     private Random rand;
 
@@ -14,17 +14,15 @@ public class Scrambler extends Thread {
     private String message;
 
     public Scrambler() {
-        servers = new ArrayList<Server>();
-        clients = new ArrayList<Client>();
-
+        serverPort = DEFAULT_SERVER_PORT;
         port = DEFAULT_PORT;
         message = "";
         rand = new Random();
 
     }
 
-    public void addServer(Server server) {
-        servers.add(server);
+    public void setServerPort(int serverPort) {
+        this.serverPort = serverPort;
     }
 
     public void setPortNumber(int portNumber) {
@@ -35,7 +33,7 @@ public class Scrambler extends Thread {
         start();
     }
 
-    public void s() {
+    public void modifyPacket() {
         int value = rand.nextInt(3);
 
         if (value < 2) {
@@ -58,7 +56,7 @@ public class Scrambler extends Thread {
             DatagramSocket mySocket = new DatagramSocket();
             byte[] msg = message.getBytes();
             InetAddress host = InetAddress.getByName("127.0.0.1");
-            DatagramPacket myPacket = new DatagramPacket(msg, msg.length, host, port);
+            DatagramPacket myPacket = new DatagramPacket(msg, msg.length, host, serverPort);
             mySocket.send(myPacket);
 
         } catch (Exception e) {
@@ -79,14 +77,8 @@ public class Scrambler extends Thread {
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 mySocket.receive(packet);
 
-                // Remove later:
-                System.out.println("ip: " + packet.getAddress());
-                System.out.println("port: " + packet.getPort());
-                System.out.print("message: ");
-                System.out.write(packet.getData(), 0, packet.getLength());
-                System.out.println();
-
                 message = new String(packet.getData());
+                modifyPacket();
             }
 
         } catch (Exception e) {
