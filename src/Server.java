@@ -36,14 +36,14 @@ public class Server extends Thread {
             byte[] buffer = new byte[1024];
 
             while(true) {
-                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                receiveSocket.receive(packet);
+                receivePacket = new DatagramPacket(buffer, buffer.length);
+                receiveSocket.receive(receivePacket);
 
                 // Remove later:
-                System.out.println("ip: " + packet.getAddress());
-                System.out.println("port: " + packet.getPort());
+                System.out.println("ip: " + receivePacket.getAddress());
+                System.out.println("port: " + receivePacket.getPort());
                 System.out.print("message: ");
-                System.out.write(packet.getData(), 0, packet.getLength());
+                System.out.write(receivePacket.getData(), 0, receivePacket.getLength());
                 System.out.println();
             }
 

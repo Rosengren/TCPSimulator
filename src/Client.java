@@ -32,41 +32,55 @@ public class Client extends Thread {
     }
 
 
+    /**
+     * Send a single packet to the client
+     * Packet format:
+     *      Message - message we want to send
+     *      Length  - size of the packet
+     *      Host    - host name (localhost)
+     *      Port    - Port number (destination)
+     */
     public void sendSingleMessage(String message) {
+
+        byte[] packet = new byte[PACKET_SIZE];
+        byte[] msg = message.getBytes();
+
+        // Need to add header information at the start of the packet
+//        packet[0] =
 
         try {
 
-            DatagramSocket mySocket = new DatagramSocket();
-            byte[] msg = message.getBytes();
-            InetAddress host = InetAddress.getByName("127.0.0.1");
-            DatagramPacket myPacket = new DatagramPacket(msg, msg.length, host, port);
-            mySocket.send(myPacket);
+            InetAddress host = InetAddress.getLocalHost();
+            sendPacket = new DatagramPacket(msg, msg.length, host, port);
+            sharedSocket.send(sendPacket);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+        sharedSocket.close();
     }
 
     public void sendMultipleMessages(int numberOfMessages, String msg) {
 
         try {
 
+            byte[] message = msg.getBytes();
+            InetAddress host = InetAddress.getLocalHost();
+            sendPacket = new DatagramPacket(message, message.length, host, port);
+
             int i = 0;
             while (i < numberOfMessages) {
 
-                DatagramSocket mySocket = new DatagramSocket();
-                byte[] message = msg.getBytes();
-                InetAddress host = InetAddress.getByName("127.0.0.1");
-                DatagramPacket myPacket = new DatagramPacket(message, message.length, host, port);
-                mySocket.send(myPacket);
-
+                sharedSocket.send(sendPacket);
                 sleep(1000);
                 i++;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        sharedSocket.close();
     }
 
 }

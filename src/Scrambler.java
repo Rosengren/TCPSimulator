@@ -45,14 +45,17 @@ public class Scrambler extends Thread {
     }
 
     public void modifyPacket() {
-        int value = rand.nextInt(3);
+        int value = rand.nextInt(8);
 
         if (value < 2) {
             scramblePacket();
             sendMessage();
+        } else if (value > 7) {
+            sendMessage();
         }
 
-        // if the value is greater than 2, the message is "lost"
+        // if the value is greater than 2 and
+        // less than 7, the message is "lost"
     }
 
     public void scramblePacket() {
@@ -65,9 +68,9 @@ public class Scrambler extends Thread {
         try {
 
             byte[] msg = message.getBytes();
-            InetAddress host = InetAddress.getByName("127.0.0.1");
-            DatagramPacket myPacket = new DatagramPacket(msg, msg.length, host, serverPort);
-            serverSocket.send(myPacket);
+            InetAddress host = InetAddress.getLocalHost();
+            sendPacket = new DatagramPacket(msg, msg.length, host, serverPort);
+            serverSocket.send(sendPacket);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -83,10 +86,10 @@ public class Scrambler extends Thread {
 
             while(true) {
 
-                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                clientSocket.receive(packet);
+                receivePacket = new DatagramPacket(buffer, buffer.length);
+                clientSocket.receive(receivePacket);
 
-                message = new String(packet.getData());
+                message = new String(receivePacket.getData());
                 modifyPacket();
             }
 
