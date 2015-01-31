@@ -1,11 +1,23 @@
 import java.net.*;
 import java.util.*;
 
+/**
+ * Scrambler
+ *
+ * This class causes lost and scrambled packets, simulating the
+ * process of sending data packets from one computer to another
+ *
+ */
 public class Scrambler extends Thread {
-
 
     private int serverPort;
     private int clientPort;
+
+    private DatagramPacket sendPacket;
+    private DatagramPacket receivePacket;
+    private DatagramSocket clientSocket;
+    private DatagramSocket serverSocket;
+    private DatagramSocket sharedSocket;
 
     private Random rand;
     private String message;
@@ -15,16 +27,17 @@ public class Scrambler extends Thread {
         this.clientPort = clientPort;
         this.serverPort = serverPort;
         message = "";
+
+        try {
+            clientSocket = new DatagramSocket(clientPort);
+            serverSocket = new DatagramSocket();
+        } catch (SocketException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
         rand = new Random();
 
-    }
-
-    public void setServerPort(int port) {
-        serverPort = port;
-    }
-
-    public void setClientPort(int port) {
-        clientPort = port;
     }
 
     public void listen() {
@@ -51,11 +64,10 @@ public class Scrambler extends Thread {
 
         try {
 
-            DatagramSocket mySocket = new DatagramSocket();
             byte[] msg = message.getBytes();
             InetAddress host = InetAddress.getByName("127.0.0.1");
             DatagramPacket myPacket = new DatagramPacket(msg, msg.length, host, serverPort);
-            mySocket.send(myPacket);
+            serverSocket.send(myPacket);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -66,15 +78,13 @@ public class Scrambler extends Thread {
     public void run() {
 
         try {
-            // TODO: add another socket to listen for messages from the server
-            DatagramSocket mySocket = new DatagramSocket(clientPort);
 
             byte[] buffer = new byte[1024];
 
             while(true) {
 
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                mySocket.receive(packet);
+                clientSocket.receive(packet);
 
                 message = new String(packet.getData());
                 modifyPacket();

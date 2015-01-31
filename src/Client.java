@@ -1,11 +1,30 @@
 import java.net.*;
 
+/**
+ * Client
+ *
+ * This class simulates the TCP protocol using UDP
+ */
 public class Client extends Thread {
+
+    private static final int PACKET_SIZE = 100;
 
     private int port;
 
+    private DatagramPacket sendPacket;
+    private DatagramPacket receivePacket;
+    private DatagramSocket sharedSocket;
+
     public Client(int portNumber) {
         port = portNumber;
+
+        try {
+            sharedSocket = new DatagramSocket();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 
     public void setPortNumber(int portNumber) {

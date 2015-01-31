@@ -1,11 +1,27 @@
 import java.net.*;
 
+/**
+ * Server
+ *
+ * This class simulates a TCP server, implemented using the
+ * UPD protocol
+ */
 public class Server extends Thread {
 
-    int clientPort;
+    private DatagramPacket sendPacket;
+    private DatagramPacket receivePacket;
+    private DatagramSocket sendSocket;
+    private DatagramSocket receiveSocket;
 
     public Server(int clientPort) {
-        this.clientPort = clientPort;
+
+        try {
+            receiveSocket = new DatagramSocket(clientPort);
+
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void listen() {
@@ -17,13 +33,11 @@ public class Server extends Thread {
 
         try {
 
-            DatagramSocket mySocket = new DatagramSocket(clientPort);
-
             byte[] buffer = new byte[1024];
 
             while(true) {
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                mySocket.receive(packet);
+                receiveSocket.receive(packet);
 
                 // Remove later:
                 System.out.println("ip: " + packet.getAddress());
