@@ -42,8 +42,9 @@ public class Client extends Thread {
      */
     public void sendSingleMessage(String message) {
 
-        byte[] packet = new byte[PACKET_SIZE];
+//        byte[] packet = new byte[PACKET_SIZE];
         byte[] msg = message.getBytes();
+        byte[] response = new byte[4];
 
         // Need to add header information at the start of the packet
 //        packet[0] =
@@ -53,6 +54,14 @@ public class Client extends Thread {
             InetAddress host = InetAddress.getLocalHost();
             sendPacket = new DatagramPacket(msg, msg.length, host, port);
             sharedSocket.send(sendPacket);
+
+
+            // wait for response
+            receivePacket = new DatagramPacket(response, response.length);
+            sharedSocket.receive(receivePacket);
+            response = receivePacket.getData();
+            // TODO: handle response
+            System.out.println("Received Acknoledgement");
 
         } catch (Exception e) {
             e.printStackTrace();

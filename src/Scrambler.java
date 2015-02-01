@@ -17,7 +17,6 @@ public class Scrambler extends Thread {
     private DatagramPacket receivePacket;
     private DatagramSocket clientSocket;
     private DatagramSocket serverSocket;
-    private DatagramSocket sharedSocket;
 
     private Random rand;
     private String message;
@@ -44,15 +43,18 @@ public class Scrambler extends Thread {
         start();
     }
 
-    public void modifyPacket() {
+    public void simulatePacketTransfer() {
         int value = rand.nextInt(8);
 
         if (value < 2) {
             scramblePacket();
-            sendMessage();
+//            sendMessage();
         } else if (value > 7) {
-            sendMessage();
+//            sendMessage();
         }
+
+        System.out.println("Sending message");
+        sendMessage();
 
         // if the value is greater than 2 and
         // less than 7, the message is "lost"
@@ -82,15 +84,16 @@ public class Scrambler extends Thread {
 
         try {
 
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[100];
 
             while(true) {
 
                 receivePacket = new DatagramPacket(buffer, buffer.length);
                 clientSocket.receive(receivePacket);
 
+                // TODO: determine if the message is coming from client or server
                 message = new String(receivePacket.getData());
-                modifyPacket();
+                simulatePacketTransfer();
             }
 
         } catch (Exception e) {

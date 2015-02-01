@@ -8,6 +8,10 @@ import java.net.*;
  */
 public class Server extends Thread {
 
+    // Acknowledgments
+    public static final byte[] invalidResponse = {0, 1, 1, 1};
+    public static final byte[] validResponse = {1, 0, 0 ,0};
+
     private DatagramPacket sendPacket;
     private DatagramPacket receivePacket;
     private DatagramSocket sendSocket;
@@ -17,7 +21,7 @@ public class Server extends Thread {
 
         try {
             receiveSocket = new DatagramSocket(clientPort);
-
+            sendSocket = new DatagramSocket();
         } catch (SocketException e) {
             e.printStackTrace();
         }
@@ -34,6 +38,7 @@ public class Server extends Thread {
         try {
 
             byte[] buffer = new byte[1024];
+            byte[] response = new byte[4];
 
             while(true) {
                 receivePacket = new DatagramPacket(buffer, buffer.length);
@@ -45,6 +50,16 @@ public class Server extends Thread {
                 System.out.print("message: ");
                 System.out.write(receivePacket.getData(), 0, receivePacket.getLength());
                 System.out.println();
+
+                // send receive acknowledgment
+
+                // TODO: verify validity of packet
+                response = validResponse;
+                sendPacket = new DatagramPacket(response, response.length,
+                        receivePacket.getAddress(), receivePacket.getPort());
+
+                System.out.println("Sending acknowledgment");
+                sendSocket.send(sendPacket);
             }
 
         } catch (Exception e) {
