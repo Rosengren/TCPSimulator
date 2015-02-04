@@ -49,13 +49,13 @@ public class Server{
             byte[] message = new byte[BYTE_BUFF_SIZE];
             InetAddress host = InetAddress.getLocalHost();
 
-            // TODO change so that we have 256 bytes (attempting to conform to protocol)
             receivePacket = new DatagramPacket(message, message.length, host, SCRAMBLER_PORT);
 
             //wait for packet
             serverSocket.receive(receivePacket);
             System.out.println("Received: " + new String(receivePacket.getData()));
-            // TODO
+
+
             if(validateCRC32(new String(receivePacket.getData()))){
 
                 sendFileInformation();
@@ -114,12 +114,8 @@ public class Server{
             char[] charMessage = fullMessage.toCharArray();
 
             //load the byte array with the checksum hash and the message.
-            for (int i = 0; i < BYTE_BUFF_SIZE; i++) {
-                if (i < charMessage.length) {
+            for (int i = 0; i < charMessage.length; i++) {
                     message[i] = (byte)charMessage[i];
-                } else {
-                    message[i] = 0; // padding
-                }
             }
 
             InetAddress host = InetAddress.getLocalHost();

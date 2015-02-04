@@ -45,12 +45,8 @@ public class Client {
             char[] charMessage = fullMessage.toCharArray();
 
             //load the byte array with the checksum hash and the message.
-            for (int i = 0; i < BYTE_BUFF_SIZE; i++) {
-                if (i < charMessage.length) {
+            for (int i = 0; i < charMessage.length; i++) {
                     message[i] = (byte)charMessage[i];
-                } else {
-                    message[i] = 0; // padding
-                }
             }
 
             //testing stuff

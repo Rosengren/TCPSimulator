@@ -46,6 +46,7 @@ public class Scrambler {
 
             byte[] buffer = new byte[BYTE_BUFF_SIZE];
             int clientPort;
+
             DatagramPacket serverPacket;
             DatagramPacket clientPacket;
 
@@ -57,17 +58,18 @@ public class Scrambler {
                 clientPort = clientPacket.getPort();
                 System.out.println("Received client message, client port is: " + clientPort);
 
-                String message = new String(clientPacket.getData());
 
-                byte[] msg;
+                buffer = clientPacket.getData();
+
                 if (packetNotLost())
-                    msg = scramblePacket(message);
+                    buffer = scramblePacket(buffer);
                 else
-                    continue; // packet is lost
+                    continue; // packet lost
+
 
                 // send message to server
                 InetAddress host = InetAddress.getLocalHost(); //local host is 127.0.0.1
-                serverPacket = new DatagramPacket(msg, msg.length, host, SERVER_PORT);
+                serverPacket = new DatagramPacket(buffer, buffer.length, host, SERVER_PORT);
                 serverSocket.send(serverPacket);
                 System.out.println("Sent message off to Server");
 
@@ -77,9 +79,16 @@ public class Scrambler {
                 System.out.println("Received Response from Server: " + serverPacket.getData().toString());
 
 
+                buffer = serverPacket.getData();
+
+                if (packetNotLost())
+                    buffer = scramblePacket(buffer);
+                else
+                    continue; // packet lost
+
                 // send message to client
-                byte[] newMsg = serverPacket.getData();
-                clientPacket = new DatagramPacket(newMsg, newMsg.length, host, clientPort);
+
+                clientPacket = new DatagramPacket(buffer, buffer.length, host, clientPort);
                 clientSocket.send(clientPacket);
                 System.out.println("Sent information to Client now");
 
@@ -100,28 +109,27 @@ public class Scrambler {
     }
 
 
-    private byte[] scramblePacket(String message) {
+    private byte[] scramblePacket(byte[] message) {
 
         if (((int)(Math.random() * 100) + 1) < 60) // 40% chance
             return shuffle(message);
 
-        return message.getBytes();
+        return message;
     }
 
 
-    private byte[] shuffle(String message) {
-        byte[] byteMessage = message.getBytes();
-
+    private byte[] shuffle(byte[] message) {
+        
         Random rnd = new Random();
-        for (int i = byteMessage.length - 1; i > 0; i--)
+        for (int i = message.length - 1; i > 0; i--)
         {
             int index = rnd.nextInt(i + 1);
-            // Simple swap
-            byte a = byteMessage[index];
-            byteMessage[index] = byteMessage[i];
-            byteMessage[i] = a;
+
+            byte a = message[index];
+            message[index] = message[i];
+            message[i] = a;
         }
-        return byteMessage;
+        return message;
     }
 
 }
