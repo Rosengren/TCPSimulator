@@ -16,15 +16,9 @@ public class Scrambler {
     private static final int SERVER_PORT = 2014;
     private static final int BYTE_BUFF_SIZE = 256;
 
-    private int clientPort;
-
-    private DatagramPacket serverPacket;
-    private DatagramPacket clientPacket;
     private DatagramSocket clientSocket;
     private DatagramSocket serverSocket;
 
-    private Random rand;
-    // private String message;
 
     public static void main (String[] args){
         Scrambler scrambler = new Scrambler();
@@ -32,6 +26,7 @@ public class Scrambler {
         scrambler.listen();
 
     } //end main
+
 
     public Scrambler() {
 
@@ -42,36 +37,47 @@ public class Scrambler {
             e.printStackTrace();
             System.exit(1);
         }
-        rand = new Random();
+
     }
+
 
     private void listen(){
         try {
 
             byte[] buffer = new byte[BYTE_BUFF_SIZE];
+            int clientPort;
+            DatagramPacket serverPacket;
+            DatagramPacket clientPacket;
 
             while(true) {
 
+                // wait for message from client(s)
                 clientPacket = new DatagramPacket(buffer, buffer.length);
                 clientSocket.receive(clientPacket);
                 clientPort = clientPacket.getPort();
                 System.out.println("Received client message, client port is: " + clientPort);
 
-                // TODO: determine if the message is coming from client or server
                 String message = new String(clientPacket.getData());
-                //simulatePacketTransfer(message);
 
-                //sendMessage stuff
-                byte[] msg = message.getBytes();
+                byte[] msg;
+                if (packetNotLost())
+                    msg = scramblePacket(message);
+                else
+                    continue; // packet is lost
+
+                // send message to server
                 InetAddress host = InetAddress.getLocalHost(); //local host is 127.0.0.1
                 serverPacket = new DatagramPacket(msg, msg.length, host, SERVER_PORT);
                 serverSocket.send(serverPacket);
                 System.out.println("Sent message off to Server");
 
+
+                // wait for message from server
                 serverSocket.receive(serverPacket);
                 System.out.println("Received Response from Server: " + serverPacket.getData().toString());
 
 
+                // send message to client
                 byte[] newMsg = serverPacket.getData();
                 clientPacket = new DatagramPacket(newMsg, newMsg.length, host, clientPort);
                 clientSocket.send(clientPacket);
@@ -81,7 +87,6 @@ public class Scrambler {
                 serverSocket.close();
                 break;
 
-                //   serverPacket = new DatagramPacket();
             }
 
         } catch (Exception e) {
@@ -89,24 +94,22 @@ public class Scrambler {
         }
     }
 
-    private void simulatePacketTransfer(String message) {
-        int value = rand.nextInt(8);
 
-//        if (value < 2) {
-//            scramblePacket(message);
-////            sendMessage();
-//        } else if (value > 7) {
-////            sendMessage();
-//        }
-
-        System.out.println("Sending message");
-        sendMessage(message); // TODO: remove later
-
-        // if the value is greater than 2 and
-        // less than 7, the message is "lost"
+    private boolean packetNotLost() {
+        return ((int)(Math.random() * 100) + 1) < 80; // 20% chance
     }
 
+
     private byte[] scramblePacket(String message) {
+
+        if (((int)(Math.random() * 100) + 1) < 60) // 40% chance
+            return shuffle(message);
+
+        return message.getBytes();
+    }
+
+
+    private byte[] shuffle(String message) {
         byte[] byteMessage = message.getBytes();
 
         Random rnd = new Random();
@@ -121,18 +124,4 @@ public class Scrambler {
         return byteMessage;
     }
 
-
-    private void sendMessage(String message) {
-
-        try {
-
-            byte[] msg = message.getBytes();
-            InetAddress host = InetAddress.getLocalHost(); //local host is 127.0.0.1
-            serverPacket = new DatagramPacket(msg, msg.length, host, SERVER_PORT);
-            serverSocket.send(serverPacket);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }

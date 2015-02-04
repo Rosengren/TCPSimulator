@@ -28,7 +28,7 @@ public class Server{
     private DatagramSocket serverSocket;
 
     public static void main (String[] args) {
-        System.out.println("Starte Server");
+        System.out.println("Start Server");
         Server server = new Server();
         server.receiveRequest();
         server.closeSockets();
@@ -83,12 +83,12 @@ public class Server{
         return false;
     }
 
-    private void sendFileInformation(){
+    private String getFileInformation(String filename) {
 
         String fileInformation = DEFAULT_ONE_LINER;
 
         try {
-            BufferedReader in = new BufferedReader(new FileReader("C:\\Users\\Nikola\\workspace\\TCP_Assignment\\bin\\Working_Package\\one-liners.txt"));
+            BufferedReader in = new BufferedReader(new FileReader(filename));
             //arbitrarily choosing to read the second line of the file
             fileInformation = in.readLine();
             fileInformation = in.readLine();
@@ -96,22 +96,34 @@ public class Server{
         } catch (FileNotFoundException e){
             System.err.println("Couldn't open quote file.  Serving time instead.");
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
+        return fileInformation;
+    }
+
+
+    private void sendFileInformation(){
+
+        String fileInformation = getFileInformation("C:\\Users\\Nikola\\workspace\\TCP_Assignment\\bin\\Working_Package\\one-liners.txt");
 
         try {
             String fullMessage = generateCRC32(fileInformation) + fileInformation;
             byte[] message = new byte[BYTE_BUFF_SIZE];
 
+            char[] charMessage = fullMessage.toCharArray();
+
             //load the byte array with the checksum hash and the message.
-            for(int i = 0; i < fullMessage.length(); i++){
-                message[i] = (byte)fullMessage.toCharArray()[i];
+            for (int i = 0; i < BYTE_BUFF_SIZE; i++) {
+                if (i < charMessage.length) {
+                    message[i] = (byte)charMessage[i];
+                } else {
+                    message[i] = 0; // padding
+                }
             }
 
             InetAddress host = InetAddress.getLocalHost();
 
-            // TODO change so that we have 256 bytes (attempting to conform to protocol)
             sendPacket = new DatagramPacket(message, message.length, host, SCRAMBLER_PORT);
 
             //send packet

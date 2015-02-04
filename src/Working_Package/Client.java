@@ -14,14 +14,13 @@ public class Client {
     private static final String DEFAULT_REQUEST_MESSAGE = "Request File Information";
 
     private DatagramPacket sendPacket;
-    private DatagramPacket scramblerPacket;
     private DatagramSocket clientSocket;
 
     public static void main (String[] args) throws InterruptedException {
 
         Client client = new Client();
         System.out.println("Started Client!");
-        // TODO do this and also make a String argument so that the user might be able to chagne the request messages --> it will show that the server rejects incorrect messages
+        // TODO do this and also make a String argument so that the user might be able to change the request messages --> it will show that the server rejects incorrect messages
         //client.sendMultipleMessages(Integer.parseInt(args[0]));
 
         client.sendMultipleMessages(1);
@@ -43,9 +42,15 @@ public class Client {
             String fullMessage = generateCRC32(DEFAULT_REQUEST_MESSAGE) + DEFAULT_REQUEST_MESSAGE;
             byte[] message = new byte[BYTE_BUFF_SIZE];
 
+            char[] charMessage = fullMessage.toCharArray();
+
             //load the byte array with the checksum hash and the message.
-            for(int i = 0; i < fullMessage.length(); i++){
-                message[i] = (byte)fullMessage.toCharArray()[i];
+            for (int i = 0; i < BYTE_BUFF_SIZE; i++) {
+                if (i < charMessage.length) {
+                    message[i] = (byte)charMessage[i];
+                } else {
+                    message[i] = 0; // padding
+                }
             }
 
             //testing stuff
@@ -59,7 +64,6 @@ public class Client {
 
             InetAddress host = InetAddress.getLocalHost();
 
-            // TODO change so that we have 256 bytes (attempting to conform to protocol)
             sendPacket = new DatagramPacket(message, message.length, host, CLIENT_RCV_PORT);
 
             for(int i = 0; i < numberOfMessages; i++){
@@ -67,8 +71,11 @@ public class Client {
                 //send packet
                 clientSocket.send(sendPacket);
                 System.out.println("Sent request packet!");
-                //wait for packet
+
+
+                // wait for packet
                 clientSocket.receive(sendPacket);
+
                 validateCRC32(new String(sendPacket.getData()));
                 System.out.println("Received information from end server: " + new String(sendPacket.getData()));
             }
