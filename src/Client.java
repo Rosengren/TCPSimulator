@@ -1,9 +1,8 @@
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.*;
-import java.util.zip.CRC32;
 
-public class Client {
+public class Client extends PacketValidation {
 
     private DatagramSocket clientSocket;
 
@@ -40,6 +39,7 @@ public class Client {
                     clientPacket = new DatagramPacket(data, data.length);
                     clientSocket.receive(clientPacket);
 
+                    System.out.println("Received packet: "  + new String(data));
                     if (invalidPacket(data)) {
                         System.out.println("Invalid Packet: Resending Message");
                         continue;
@@ -115,24 +115,6 @@ public class Client {
         result[lastIndex] = stringToSplit.substring(j);
 
         return result;
-    }
-
-
-    private boolean invalidPacket(byte[] data) {
-        try {
-            if (data[0] == TCPConstants.INVALID_PACKET) {
-                return true;
-            }
-        } catch (Exception e) {}
-
-        return false;
-    }
-
-
-    private long generateCRC32(String message){
-        CRC32 crc = new CRC32();
-        crc.update(message.getBytes());
-        return crc.getValue();
     }
 
 

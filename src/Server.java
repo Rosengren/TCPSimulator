@@ -1,13 +1,13 @@
+import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
-import java.util.Arrays;
-import java.util.zip.CRC32;
 
-public class Server {
+public class Server extends PacketValidation {
+
+    private static final String FILENAME = "log_file.txt";
 
     private int currentClient;
-    private String reconstructedMessage;
 
     private DatagramSocket clientSocket;
 
@@ -22,7 +22,6 @@ public class Server {
         } catch (SocketException e) {
             e.printStackTrace();
         }
-
     }
 
 
@@ -32,7 +31,6 @@ public class Server {
         int packetNum = 0;
         DatagramPacket clientPacket;
 
-        reconstructedMessage = "";
         try {
 
             while(true) { // always listen for incoming messages
@@ -48,12 +46,14 @@ public class Server {
 
                 if (validatePacket(data, packetNum)) {
                     System.out.println("Packet is good!");
-                    String[] d = splitPacket(data);
-                    if (Integer.parseInt(d[2]) == packetNum) {
-                        reconstructedMessage += d[3];
+
+                    // Determine if the packet was the previously received packet or a new packet
+                    Packet packet = splitPacket(data);
+                    if (packet.getId() == packetNum) {
+                        saveToFile(packet.getData());
                         packetNum++;
                     }
-                    
+
                     data[0] = 1;
                 } else {
                     System.out.println("Packet is not good!");
@@ -64,7 +64,6 @@ public class Server {
                 clientPacket = new DatagramPacket(data, data.length, clientPacket.getAddress(), clientPacket.getPort());
                 clientSocket.send(clientPacket);
 
-                System.out.println("Current message: " + reconstructedMessage);
             }
 
 
@@ -73,51 +72,15 @@ public class Server {
         }
     }
 
-
-    private boolean validatePacket(byte[] data, int packetNumber) {
-
-        String[] elements = splitPacket(data);
-
+    private void saveToFile(String message) {
+        // TODO: add a delimiter between complete messages
         try {
-
-            // TODO: Check if correct client
-
-            // Check if packet is the packet we want
-            if (Integer.parseInt(elements[2]) > packetNumber) {
-                return false;
-            }
-
-            // verify checkSum
-            if (!validateCRC32(elements[3], Long.parseLong(elements[4].replaceAll("\\s+","")))) {
-                return  false;
-            }
-
-        } catch (Exception e) {
-            System.out.println("Invalid Packet");
-            return false;
+            FileWriter fw = new FileWriter(FILENAME, true);
+            fw.write(message);
+            fw.close();
+        } catch(IOException ioe) {
+            System.err.println("IOException: " + ioe.getMessage());
         }
-        return true;
-
-    }
-
-
-    private String[] splitPacket(byte[] data) {
-        String[] result = new String[TCPConstants.NUM_OF_PACKET_COMPONENTS];
-
-        result[0] = new String(Arrays.copyOfRange(data, 0, TCPConstants.PACKET_VALIDATION + 1));
-        result[1] = new String(Arrays.copyOfRange(data, TCPConstants.PACKET_SOURCE, TCPConstants.PACKET_ID));
-        result[2] = new String(Arrays.copyOfRange(data, TCPConstants.PACKET_ID, TCPConstants.PACKET_DATA));
-        result[3] = new String(Arrays.copyOfRange(data, TCPConstants.PACKET_DATA, TCPConstants.PACKET_CHECKSUM));
-        result[4] = new String(Arrays.copyOfRange(data, TCPConstants.PACKET_CHECKSUM, TCPConstants.PACKET_SIZE));
-
-        return result;
-    }
-
-
-    private boolean validateCRC32(String message, long hashValue){
-        CRC32 crc = new CRC32();
-        crc.update(message.getBytes());
-        return hashValue == crc.getValue();
     }
 
 

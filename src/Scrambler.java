@@ -7,6 +7,9 @@ import java.util.Random;
 
 public class Scrambler {
 
+    private static final int SCRAMBLE_MESSAGE_PROBABILITY = 40; // percentage (%);
+    private static final int LOST_PACKET_PROBABILITY = 20; // percentage;
+
     private DatagramSocket serverSocket;
     private DatagramSocket clientSocket;
 
@@ -76,13 +79,13 @@ public class Scrambler {
 
 
     private boolean packetNotLost() {
-        return ((int)(Math.random() * 100) + 1) > 20; // 20% chance TODO
+        return ((int)(Math.random() * 100) + 1) > LOST_PACKET_PROBABILITY;
     }
 
 
     private byte[] scramblePacket(byte[] message) {
 
-        if (((int)(Math.random() * 100) + 1) < 20) // 20% chance TODO
+        if (((int)(Math.random() * 100) + 1) < SCRAMBLE_MESSAGE_PROBABILITY)
             return shuffle(message);
 
 
