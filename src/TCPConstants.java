@@ -29,7 +29,6 @@ public final class TCPConstants {
     public static final int VALID_PACKET = 1;
     public static final int INVALID_PACKET = 0;
 
-    public static final String DEFAULT_MESSAGE_TO_SEND = "Oh No.";
-//    public static final String DEFAULT_MESSAGE_TO_SEND = "I Can't Believe this is not butter";
+    public static final String DEFAULT_MESSAGE_TO_SEND = "I Can't Believe this is not butter";
 
 }

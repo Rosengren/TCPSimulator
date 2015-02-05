@@ -50,9 +50,9 @@ public class Scrambler {
         DatagramPacket serverPacket;
         DatagramPacket clientPacket;
 
-        try {
-            while (true) {
 
+        while (true) {
+            try {
                 clientPacket = new DatagramPacket(data, data.length);
                 clientSocket.receive(clientPacket);
 
@@ -87,11 +87,15 @@ public class Scrambler {
                 // send message to client
                 clientPacket = new DatagramPacket(data, data.length, InetAddress.getLocalHost(), clientPacket.getPort());
                 clientSocket.send(clientPacket);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("Error: Scrambler cannot send/receive packets");
+                break;
             }
 
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+
 
     }
 
