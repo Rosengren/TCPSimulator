@@ -76,7 +76,7 @@ public class Server {
 
 
             // Check if packet is the packet we want
-            if (Integer.parseInt(elements[2]) != packetNumber || Integer.parseInt(elements[2]) == packetNumber - 1) {
+            if (Integer.parseInt(elements[2]) > packetNumber) {
                 return false;
             }
             System.out.println("CheckSum " + elements[3] + " " + elements[4] + " " + elements[4].length());
@@ -87,7 +87,7 @@ public class Server {
                 return  false;
             }
         } catch (Exception e) {
-            System.out.println("Long is messed up!");
+            System.out.println("Invalid Packet");
             return false;
         }
         return true;
@@ -110,9 +110,7 @@ public class Server {
 
     private boolean validateCRC32(String message, long hashValue){
         CRC32 crc = new CRC32();
-        System.out.println("Got here: " + message.length());
         crc.update(message.getBytes());
-        System.out.println("hashValue " + hashValue + " crc: " + crc.getValue() + " msg: " + message);
         return hashValue == crc.getValue();
     }
 

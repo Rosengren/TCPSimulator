@@ -102,7 +102,7 @@ public class Scrambler {
             message[i] = a;
         }
 
-        System.out.println("Scrambling Data " + new String(message));
+        System.out.println("Scrambling Data to: \"" + new String(message) + "\"");
         return message;
     }
 

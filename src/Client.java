@@ -125,12 +125,6 @@ public class Client {
     }
 
 
-    /**
-     * invalidPacket
-     *
-     * @param data packet to verify
-     * @return true if the packet is not valid
-     */
     private boolean invalidPacket(byte[] data) {
         try {
             if (data[0] == TCPConstants.INVALID_PACKET) {
