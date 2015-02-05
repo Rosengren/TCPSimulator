@@ -6,20 +6,10 @@ import java.util.zip.CRC32;
 
 public class Client {
 
-    private static final int SCRAMBLER_PORT = 3000;
-    private static final int CLIENT_PORT = 4000;
-
-    private static final int TIMEOUT = 1000;
-    private static final int PACKET_VALID_SIZE      = 1;
-    private static final int PACKET_SOURCE_SIZE     = 4;
-    private static final int PACKET_ID_SIZE         = 4;
-    private static final int PACKET_DATA_SIZE       = 10;
-    private static final int PACKET_CHECKSUM_SIZE   = 10;
-    private static final int PACKET_SIZE = PACKET_ID_SIZE + PACKET_DATA_SIZE + PACKET_CHECKSUM_SIZE;
 
     private static final int VALID_PACKET = 1;
 
-    private static final String DEFAULT_MESSAGE_TO_SEND = "Hello"; // TODO: split message
+    private static final String DEFAULT_MESSAGE_TO_SEND = "I Can't Believe this is not butter"; // TODO: split message
 
     private DatagramSocket clientSocket;
     private DatagramPacket clientPacket;
@@ -28,7 +18,7 @@ public class Client {
 
         try {
             clientSocket = new DatagramSocket();
-            clientSocket.setSoTimeout(TIMEOUT);
+            clientSocket.setSoTimeout(TCPConstants.TIMEOUT);
         } catch (SocketException e) {
             e.printStackTrace();
         }
@@ -42,7 +32,7 @@ public class Client {
         byte[] data;
         int packetID = 0;
 
-        String[] splitMessage = splitStringEvery(DEFAULT_MESSAGE_TO_SEND, PACKET_DATA_SIZE);
+        String[] splitMessage = splitStringEvery(DEFAULT_MESSAGE_TO_SEND, TCPConstants.PACKET_DATA_SIZE);
 
         try {
 
@@ -51,22 +41,26 @@ public class Client {
 
                 data = constructPacket(splitMessage[i], packetID);
 
-                clientPacket = new DatagramPacket(data, data.length, InetAddress.getLocalHost(), SCRAMBLER_PORT);
+                clientPacket = new DatagramPacket(data, data.length, InetAddress.getLocalHost(), TCPConstants.SCRAMBLER_PORT);
                 clientSocket.send(clientPacket);
 
                 try {
+                    clientPacket = new DatagramPacket(data, data.length);
                     clientSocket.receive(clientPacket);
                     packetID++; // send next packet
-                } catch (SocketTimeoutException e) {
+
+
+                    System.out.println("Sending Next Message");
                     // resend
+                } catch (SocketTimeoutException e) {
+                    System.out.println("Failed To Send");
+                    i--;
                 }
 
-                if (i >= splitMessage.length) {
-                    // sent all packets
+                if (i < splitMessage.length - 1)
+                    i++;
+                else
                     break;
-                }
-
-                i++;
             }
 
 
@@ -85,7 +79,7 @@ public class Client {
 
         byte[] id = ByteBuffer.allocate(4).putInt(packetID).array();
 
-        byte[] msg = new byte[PACKET_DATA_SIZE];
+        byte[] msg = new byte[TCPConstants.PACKET_DATA_SIZE];
         char[] msgArray = message.toCharArray();
 
         for (int i = 0; i < msgArray.length; i++) {
@@ -96,7 +90,7 @@ public class Client {
 
         try {
             outputStream.write(VALID_PACKET);
-            outputStream.write(CLIENT_PORT);
+            outputStream.write(Integer.toString(TCPConstants.CLIENT_PORT).getBytes());
             outputStream.write(id);
             outputStream.write(msg);
             outputStream.write(checkSum);
