@@ -2,10 +2,21 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.*;
 
+/**
+ * Client
+ *
+ * Client-side of TCP simulator using UDP
+ */
 public class Client extends PacketValidation {
 
     private DatagramSocket clientSocket;
 
+    /**
+     * Constructor
+     *
+     * initializes socket connection with Server and sets a
+     * time limit before a packet is considered "lost"
+     */
     public Client() {
 
         try {
@@ -17,10 +28,18 @@ public class Client extends PacketValidation {
     }
 
 
+    /**
+     * sendReceive
+     *
+     * sends (uploads) messages to a server, simulating a TCP transfer using UDP.
+     * When a packet is lost or scrambled, the packet is sent again until it is
+     * acknowledged. Once acknowledged, this client sends the next packet until
+     * all packets have been successfully received.
+     */
     public void sendReceive() {
 
         byte[] data;
-        int packetID = 0;
+        int packetID = TCPConstants.INITIAL_PACKET;
         DatagramPacket clientPacket;
 
         String[] splitMessage = splitStringEvery(TCPConstants.DEFAULT_MESSAGE_TO_SEND, TCPConstants.PACKET_DATA_SIZE);
@@ -40,7 +59,7 @@ public class Client extends PacketValidation {
                     clientSocket.receive(clientPacket);
 
                     System.out.println("Received packet: "  + new String(data));
-                    if (invalidPacket(data)) {
+                    if (!validatePacket(data, packetID)) {
                         System.out.println("Invalid Packet: Resending Message");
                         continue;
                     }
@@ -55,11 +74,16 @@ public class Client extends PacketValidation {
                     continue;
                 }
 
-                if (i < splitMessage.length - 1)
+                if (i < splitMessage.length - 2)
                     i++;
                 else
                     break;
             }
+
+            // Send an end message
+
+            i++; // final packet
+            data = constructPacket(splitMessage[i], TCPConstants.FINAL_PACKET);
 
         } catch (java.io.IOException e) {
             e.printStackTrace();
@@ -102,6 +126,15 @@ public class Client extends PacketValidation {
     }
 
 
+    /**
+     * splitStringEvery
+     *
+     * split a given string into equal interval divisions (with the exception of the last
+     * string which may be less than the interval)
+     * @param stringToSplit: string to be divided
+     * @param interval: length of each divided string
+     * @return array of divided strings
+     */
     private String[] splitStringEvery(String stringToSplit, int interval) {
         int arrayLength = (int) Math.ceil(((stringToSplit.length() / (double)interval)));
         String[] result = new String[arrayLength];

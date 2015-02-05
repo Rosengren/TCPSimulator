@@ -3,6 +3,11 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 
+/**
+ * Server
+ *
+ * Server-side of TCP simulator using UDP
+ */
 public class Server extends PacketValidation {
 
     private static final String FILENAME = "log_file.txt";
@@ -12,6 +17,12 @@ public class Server extends PacketValidation {
     private DatagramSocket clientSocket;
 
 
+    /**
+     * Constructor
+     *
+     * initializes the client socket to listen for incoming
+     * packets
+     */
     public Server() {
 
         currentClient = -1; // TODO: check which client the packets are coming from
@@ -25,10 +36,19 @@ public class Server extends PacketValidation {
     }
 
 
+    /**
+     * sendReceive
+     *
+     * listens for incoming data and sends an acknowledgment when
+     * the packet has not been scrambled or modified during
+     * transmission. If a packet has been changed, a message
+     * is sent, notifying the client that the packet needs
+     * to be re-sent
+     */
     public void sendReceive() {
 
         byte[] data;
-        int packetNum = 0;
+        int packetNum = 1; //
         DatagramPacket clientPacket;
 
         try {
@@ -72,6 +92,12 @@ public class Server extends PacketValidation {
         }
     }
 
+    /**
+     * saveToFile
+     *
+     * saves incoming packets to a file
+     * @param message to append to a file
+     */
     private void saveToFile(String message) {
         // TODO: add a delimiter between complete messages
         try {

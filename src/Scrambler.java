@@ -5,6 +5,11 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.Random;
 
+/**
+ * Scrambler
+ *
+ * simulates the loss and scrambling of packets between clients and a server
+ */
 public class Scrambler {
 
     private static final int SCRAMBLE_MESSAGE_PROBABILITY = 40; // percentage (%);
@@ -14,6 +19,12 @@ public class Scrambler {
     private DatagramSocket clientSocket;
 
 
+    /**
+     * Constructor
+     *
+     * initializes the socket between the scrambler and the client
+     * as well as opens a socket for incoming clients
+     */
     public Scrambler() {
 
         try {
@@ -25,7 +36,14 @@ public class Scrambler {
     }
 
 
-
+    /**
+     * sendReceive
+     *
+     * receives messages from clients and the server and randomly decides
+     * to "lose", scrambler, or successfully transmit the message to the
+     * correct recipient.
+     *
+     */
     public void sendReceive() {
 
         byte[] data = new byte[TCPConstants.PACKET_SIZE];
@@ -78,11 +96,25 @@ public class Scrambler {
     }
 
 
+    /**
+     * packetNotLost
+     *
+     * Randomly decide whether a packet should be lost
+     * @return true if packet is not lost, false otherwise
+     */
     private boolean packetNotLost() {
         return ((int)(Math.random() * 100) + 1) > LOST_PACKET_PROBABILITY;
     }
 
 
+    /**
+     * scramblePacket
+     *
+     * Randomly decide whether to scramble a message
+     *
+     * @param message to potentially scramble
+     * @return potentially scrambled message
+     */
     private byte[] scramblePacket(byte[] message) {
 
         if (((int)(Math.random() * 100) + 1) < SCRAMBLE_MESSAGE_PROBABILITY)
@@ -93,6 +125,14 @@ public class Scrambler {
     }
 
 
+    /**
+     * shuffle
+     *
+     * randomly swap multiple characters in a given byte array
+     *
+     * @param message to shuffle
+     * @return shuffled message
+     */
     private byte[] shuffle(byte[] message) {
 
         Random rnd = new Random();
@@ -108,7 +148,6 @@ public class Scrambler {
         System.out.println("Scrambling Data to: \"" + new String(message) + "\"");
         return message;
     }
-
 
 
     public static void main(String args[]) {

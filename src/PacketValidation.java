@@ -1,20 +1,53 @@
 import java.util.Arrays;
 import java.util.zip.CRC32;
 
+/**
+ * PacketValidation
+ *
+ * Contains all of the common methods used by Client-side and Server-side
+ * packet handling
+ */
 public abstract class PacketValidation {
 
+
+    /**
+     * generateCRC32
+     *
+     * generates a hash number (long) based on a given string
+     * @param message to generate hash for
+     * @return long hash number
+     */
     protected long generateCRC32(String message){
         CRC32 crc = new CRC32();
         crc.update(message.getBytes());
         return crc.getValue();
     }
 
+
+    /**
+     * validateCRC32
+     *
+     * compares a given string with a given hash number to determine
+     * if the string correctly matches the number
+     * @param message to compare with the hash
+     * @param hashValue to compare with the message
+     * @return true if they match, false otherwise
+     */
     protected boolean validateCRC32(String message, long hashValue){
         CRC32 crc = new CRC32();
         crc.update(message.getBytes());
         return hashValue == crc.getValue();
     }
 
+
+    /**
+     * splitPacket
+     *
+     * breaks up a packet into its individual components and returns a
+     * Packet object containing all the information from the packet
+     * @param data packet to split
+     * @return Packet object
+     */
     protected Packet splitPacket(byte[] data) {
         Packet packet = new Packet();
 
@@ -48,6 +81,17 @@ public abstract class PacketValidation {
         return packet;
     }
 
+
+    /**
+     * validatePacket
+     *
+     * determines whether a packet is valid or has been modified
+     * while being sent. This method checks the packet id, checkSum,
+     * and that the packet has been received by the correct client
+     * @param data packet to validate
+     * @param packetId expected
+     * @return true if the packet is valid, false otherwise
+     */
     protected boolean validatePacket(byte[] data, int packetId) {
 
         Packet packet = splitPacket(data);
@@ -66,6 +110,11 @@ public abstract class PacketValidation {
                 return  false;
             }
 
+
+            if (packet.getValidation() == TCPConstants.INVALID_PACKET) {
+                return false;
+            }
+
         } catch (Exception e) {
             System.out.println("Invalid Packet");
             return false;
@@ -75,27 +124,11 @@ public abstract class PacketValidation {
     }
 
 
-    protected boolean invalidPacket(byte[] data) {
-        Packet packet;
-        try {
-            packet = splitPacket(data);
-            // verify checkSum
-            if (!validateCRC32(packet.getData(), packet.getChecksum())) {
-                return  true;
-            }
-
-            if (packet.getValidation() == TCPConstants.INVALID_PACKET) {
-                return true;
-            }
-
-        } catch (Exception e) {
-            return true;
-        }
-
-        return false;
-    }
-
-
+    /**
+     * Packet
+     *
+     * object representing a packet
+     */
     protected class Packet {
 
         private int validation;
