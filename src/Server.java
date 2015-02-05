@@ -7,16 +7,17 @@ import java.util.zip.CRC32;
 public class Server {
 
     private int currentClient;
+    private String reconstructedMessage;
 
     private DatagramSocket clientSocket;
 
+
     public Server() {
 
-        currentClient = -1;
+        currentClient = -1; // TODO: check which client the packets are coming from
 
         try {
 
-            // establish constant connection with client
             clientSocket = new DatagramSocket(TCPConstants.SERVER_PORT);
         } catch (SocketException e) {
             e.printStackTrace();
@@ -24,12 +25,14 @@ public class Server {
 
     }
 
+
     public void sendReceive() {
 
         byte[] data;
         int packetNum = 0;
         DatagramPacket clientPacket;
 
+        reconstructedMessage = "";
         try {
 
             while(true) { // always listen for incoming messages
@@ -43,11 +46,14 @@ public class Server {
 
                 data = clientPacket.getData();
 
-                splitPacket(data);
                 if (validatePacket(data, packetNum)) {
                     System.out.println("Packet is good!");
-
-                    packetNum++;
+                    String[] d = splitPacket(data);
+                    if (Integer.parseInt(d[2]) == packetNum) {
+                        reconstructedMessage += d[3];
+                        packetNum++;
+                    }
+                    
                     data[0] = 1;
                 } else {
                     System.out.println("Packet is not good!");
@@ -58,6 +64,7 @@ public class Server {
                 clientPacket = new DatagramPacket(data, data.length, clientPacket.getAddress(), clientPacket.getPort());
                 clientSocket.send(clientPacket);
 
+                System.out.println("Current message: " + reconstructedMessage);
             }
 
 
@@ -65,6 +72,7 @@ public class Server {
 
         }
     }
+
 
     private boolean validatePacket(byte[] data, int packetNumber) {
 
@@ -74,18 +82,16 @@ public class Server {
 
             // TODO: Check if correct client
 
-
             // Check if packet is the packet we want
             if (Integer.parseInt(elements[2]) > packetNumber) {
                 return false;
             }
-            System.out.println("CheckSum " + elements[3] + " " + elements[4] + " " + elements[4].length());
 
             // verify checkSum
-
             if (!validateCRC32(elements[3], Long.parseLong(elements[4].replaceAll("\\s+","")))) {
                 return  false;
             }
+
         } catch (Exception e) {
             System.out.println("Invalid Packet");
             return false;
@@ -113,6 +119,7 @@ public class Server {
         crc.update(message.getBytes());
         return hashValue == crc.getValue();
     }
+
 
     public static void main(String args[]) {
         Server server = new Server();

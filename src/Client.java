@@ -41,6 +41,7 @@ public class Client {
                     clientSocket.receive(clientPacket);
 
                     if (invalidPacket(data)) {
+                        System.out.println("Invalid Packet: Resending Message");
                         continue;
                     }
 
@@ -50,7 +51,7 @@ public class Client {
                     System.out.println("Sending Next Message");
                     // resend
                 } catch (SocketTimeoutException e) {
-                    System.out.println("Resending Message");
+                    System.out.println("Response Timed out: Resending Message");
                     continue;
                 }
 
@@ -101,14 +102,6 @@ public class Client {
     }
 
 
-    /**
-     * SplitStringEvery
-     *
-     * Splits a given string into specific character lengths
-     * @param stringToSplit: string to divide
-     * @param interval: number of characters per division
-     * @return String array of divided string
-     */
     private String[] splitStringEvery(String stringToSplit, int interval) {
         int arrayLength = (int) Math.ceil(((stringToSplit.length() / (double)interval)));
         String[] result = new String[arrayLength];
