@@ -9,7 +9,6 @@ public class Server {
     private int currentClient;
 
     private DatagramSocket clientSocket;
-    private DatagramPacket clientPacket;
 
     public Server() {
 
@@ -29,6 +28,8 @@ public class Server {
 
         byte[] data;
         int packetNum = 0;
+        DatagramPacket clientPacket;
+
         try {
 
             while(true) { // always listen for incoming messages
@@ -38,29 +39,25 @@ public class Server {
                 clientPacket = new DatagramPacket(data, data.length);
                 clientSocket.receive(clientPacket);
 
+                System.out.println("Received Packet " + new String(data));
+
                 data = clientPacket.getData();
 
                 splitPacket(data);
                 if (validatePacket(data, packetNum)) {
                     System.out.println("Packet is good!");
-                    // send positive response
+
                     packetNum++;
                     data[0] = 1;
                 } else {
                     System.out.println("Packet is not good!");
                     // set first bit to 0;
                     data[0] = 0;
-                    // send negative response
                 }
-
-                System.out.println("Received Packet " + new String(data));
-
-                System.out.println("Sending response");
 
                 clientPacket = new DatagramPacket(data, data.length, clientPacket.getAddress(), clientPacket.getPort());
                 clientSocket.send(clientPacket);
 
-                System.out.println("Sent");
             }
 
 
@@ -73,17 +70,27 @@ public class Server {
 
         String[] elements = splitPacket(data);
 
-        // TODO: Check if correct client
+        try {
+
+            // TODO: Check if correct client
 
 
-        // Check if packet is the packet we want
-        if (Integer.parseInt(elements[2]) != packetNumber) {
+            // Check if packet is the packet we want
+            if (Integer.parseInt(elements[2]) != packetNumber || Integer.parseInt(elements[2]) == packetNumber - 1) {
+                return false;
+            }
+            System.out.println("CheckSum " + elements[3] + " " + elements[4] + " " + elements[4].length());
+
+            // verify checkSum
+
+            if (!validateCRC32(elements[3], Long.parseLong(elements[4].replaceAll("\\s+","")))) {
+                return  false;
+            }
+        } catch (Exception e) {
+            System.out.println("Long is messed up!");
             return false;
         }
-        System.out.println("CheckSum " + elements[3] + " " + elements[4] + " " + elements[4].length());
-
-        // verify checkSum
-        return validateCRC32(elements[3], Long.parseLong(elements[4].replaceAll("\\s+","")));
+        return true;
 
     }
 

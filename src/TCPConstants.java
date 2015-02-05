@@ -5,7 +5,7 @@ public final class TCPConstants {
     public static final int SCRAMBLER_PORT = 3000;
     public static final int CLIENT_PORT    = 4000;
 
-    public static final int TIMEOUT = 5000;
+    public static final int TIMEOUT = 1000;
 
     public static final int PACKET_VALID_SIZE      = 1;
     public static final int PACKET_SOURCE_SIZE     = 4;

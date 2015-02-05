@@ -41,7 +41,7 @@ public class Client {
                     clientSocket.receive(clientPacket);
 
                     if (invalidPacket(data)) {
-                        i--;
+                        continue;
                     }
 
                     packetID++; // send next packet
@@ -51,7 +51,7 @@ public class Client {
                     // resend
                 } catch (SocketTimeoutException e) {
                     System.out.println("Resending Message");
-                    i--;
+                    continue;
                 }
 
                 if (i < splitMessage.length - 1)
@@ -132,7 +132,13 @@ public class Client {
      * @return true if the packet is not valid
      */
     private boolean invalidPacket(byte[] data) {
-        return data[0] == TCPConstants.INVALID_PACKET;
+        try {
+            if (data[0] == TCPConstants.INVALID_PACKET) {
+                return true;
+            }
+        } catch (Exception e) {}
+
+        return false;
     }
 
 
