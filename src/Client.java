@@ -1,18 +1,11 @@
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.*;
-import java.nio.ByteBuffer;
 import java.util.zip.CRC32;
 
 public class Client {
 
-
-    private static final int VALID_PACKET = 1;
-
-    private static final String DEFAULT_MESSAGE_TO_SEND = "I Can't Believe this is not butter"; // TODO: split message
-
     private DatagramSocket clientSocket;
-    private DatagramPacket clientPacket;
 
     public Client() {
 
@@ -23,7 +16,6 @@ public class Client {
             e.printStackTrace();
         }
 
-
     }
 
 
@@ -31,8 +23,9 @@ public class Client {
 
         byte[] data;
         int packetID = 0;
+        DatagramPacket clientPacket;
 
-        String[] splitMessage = splitStringEvery(DEFAULT_MESSAGE_TO_SEND, TCPConstants.PACKET_DATA_SIZE);
+        String[] splitMessage = splitStringEvery(TCPConstants.DEFAULT_MESSAGE_TO_SEND, TCPConstants.PACKET_DATA_SIZE);
 
         try {
 
@@ -45,15 +38,21 @@ public class Client {
                 clientSocket.send(clientPacket);
 
                 try {
+                    System.out.println("Sent: " + new String(clientPacket.getData()));
                     clientPacket = new DatagramPacket(data, data.length);
                     clientSocket.receive(clientPacket);
+
+                    if (invalidPacket(data)) {
+                        i--;
+                    }
+
                     packetID++; // send next packet
 
 
                     System.out.println("Sending Next Message");
                     // resend
                 } catch (SocketTimeoutException e) {
-                    System.out.println("Failed To Send");
+                    System.out.println("Resending Message");
                     i--;
                 }
 
@@ -77,8 +76,6 @@ public class Client {
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-        byte[] id = ByteBuffer.allocate(4).putInt(packetID).array();
-
         byte[] msg = new byte[TCPConstants.PACKET_DATA_SIZE];
         char[] msgArray = message.toCharArray();
 
@@ -86,12 +83,12 @@ public class Client {
             msg[i] = (byte)msgArray[i];
         }
 
-        byte[] checkSum = generateCRC32(message).getBytes();
+        byte[] checkSum = String.format("%10d", generateCRC32(new String(msg))).getBytes();
 
         try {
-            outputStream.write(VALID_PACKET);
+            outputStream.write(Integer.toString(TCPConstants.VALID_PACKET).getBytes());
             outputStream.write(Integer.toString(TCPConstants.CLIENT_PORT).getBytes());
-            outputStream.write(id);
+            outputStream.write(String.format("%04d", packetID).getBytes());
             outputStream.write(msg);
             outputStream.write(checkSum);
         } catch (IOException e) {
@@ -102,6 +99,7 @@ public class Client {
 
     }
 
+
     private String[] splitStringEvery(String s, int interval) {
         int arrayLength = (int) Math.ceil(((s.length() / (double)interval)));
         String[] result = new String[arrayLength];
@@ -111,17 +109,22 @@ public class Client {
         for (int i = 0; i < lastIndex; i++) {
             result[i] = s.substring(j, j + interval);
             j += interval;
-        } //Add the last bit
+        } // Add the last bit
         result[lastIndex] = s.substring(j);
 
         return result;
     }
 
-    private String generateCRC32(String message){
+
+    private boolean invalidPacket(byte[] data) {
+        return data[0] == TCPConstants.INVALID_PACKET;
+    }
+
+
+    private long generateCRC32(String message){
         CRC32 crc = new CRC32();
         crc.update(message.getBytes());
-        long hashValue = crc.getValue();
-        return Long.toString(hashValue);
+        return crc.getValue();
     }
 
 
