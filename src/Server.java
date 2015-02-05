@@ -25,7 +25,7 @@ public class Server extends PacketValidation {
      */
     public Server() {
 
-        currentClient = -1; // TODO: check which client the packets are coming from
+        currentClient = TCPConstants.NO_CLIENT;
 
         try {
 
@@ -48,7 +48,7 @@ public class Server extends PacketValidation {
     public void sendReceive() {
 
         byte[] data;
-        int packetNum = 1; //
+        int packetNum = TCPConstants.INITIAL_PACKET;
         DatagramPacket clientPacket;
 
         try {
@@ -64,14 +64,22 @@ public class Server extends PacketValidation {
 
                 data = clientPacket.getData();
 
-                if (validatePacket(data, packetNum)) {
+                if (validatePacket(data, packetNum, currentClient)) {
                     System.out.println("Packet is good!");
 
-                    // Determine if the packet was the previously received packet or a new packet
+                    // Determine if the packet was previously received or is a new one
                     Packet packet = splitPacket(data);
+
+                    currentClient = packet.getSource();
                     if (packet.getId() == packetNum) {
                         saveToFile(packet.getData());
                         packetNum++;
+
+                    } else if (lastPacketReceived(packet.getId())) {
+                        System.out.println("FINAL MESSAGE RECEIVED");
+                        packetNum = 1;
+                        saveToFile(packet.getData() + "<endOfMessage>\n");
+                        currentClient = TCPConstants.NO_CLIENT;
                     }
 
                     data[0] = 1;
@@ -91,6 +99,12 @@ public class Server extends PacketValidation {
 
         }
     }
+
+
+    private boolean lastPacketReceived(int packetID) {
+        return packetID == TCPConstants.FINAL_PACKET;
+    }
+
 
     /**
      * saveToFile

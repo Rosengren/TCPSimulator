@@ -92,16 +92,19 @@ public abstract class PacketValidation {
      * @param packetId expected
      * @return true if the packet is valid, false otherwise
      */
-    protected boolean validatePacket(byte[] data, int packetId) {
+    protected boolean validatePacket(byte[] data, int packetId, int currentClient) {
 
         Packet packet = splitPacket(data);
 
         try {
 
-            // TODO: Check if correct client
+            // Check if packet is coming from the correct client
+            if (currentClient != packet.getSource() && currentClient != TCPConstants.NO_CLIENT) {
+                return false;
+            }
 
             // Check if packet is the packet we want
-            if (packet.getId() > packetId) {
+            if (packet.getId() > packetId && packetId != TCPConstants.FINAL_PACKET) {
                 return false;
             }
 
@@ -155,6 +158,10 @@ public abstract class PacketValidation {
 
         public int getId() {
             return id;
+        }
+
+        public int getSource() {
+            return source;
         }
 
         public String getData() {

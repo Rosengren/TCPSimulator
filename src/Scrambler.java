@@ -12,8 +12,8 @@ import java.util.Random;
  */
 public class Scrambler {
 
-    private static final int SCRAMBLE_MESSAGE_PROBABILITY = 40; // percentage (%);
-    private static final int LOST_PACKET_PROBABILITY = 20; // percentage;
+    private static final int SCRAMBLE_MESSAGE_PROBABILITY = 40; // percentage (%)
+    private static final int LOST_PACKET_PROBABILITY = 20; // percentage (%)
 
     private DatagramSocket serverSocket;
     private DatagramSocket clientSocket;

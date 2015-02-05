@@ -10,18 +10,22 @@ import java.net.*;
 public class Client extends PacketValidation {
 
     private DatagramSocket clientSocket;
+    private int clientPort;
 
     /**
      * Constructor
      *
      * initializes socket connection with Server and sets a
      * time limit before a packet is considered "lost"
+     * Also, set a randomly generated port number
+     * between 1 and 9999
      */
     public Client() {
 
         try {
             clientSocket = new DatagramSocket();
             clientSocket.setSoTimeout(TCPConstants.TIMEOUT);
+            clientPort = generateClientPort();
         } catch (SocketException e) {
             e.printStackTrace();
         }
@@ -48,7 +52,12 @@ public class Client extends PacketValidation {
             int i = 0;
             while(true) {
 
-                data = constructPacket(splitMessage[i], packetID);
+                if (i == splitMessage.length - 1) {// final packet
+                    data = constructPacket(splitMessage[i], TCPConstants.FINAL_PACKET); // send end message
+                    System.out.println("FINAL MESSAGE SENT");
+                } else
+                    data = constructPacket(splitMessage[i], packetID);
+
 
                 clientPacket = new DatagramPacket(data, data.length, InetAddress.getLocalHost(), TCPConstants.SCRAMBLER_PORT);
                 clientSocket.send(clientPacket);
@@ -59,7 +68,7 @@ public class Client extends PacketValidation {
                     clientSocket.receive(clientPacket);
 
                     System.out.println("Received packet: "  + new String(data));
-                    if (!validatePacket(data, packetID)) {
+                    if (!validatePacket(data, packetID, clientPort)) {
                         System.out.println("Invalid Packet: Resending Message");
                         continue;
                     }
@@ -74,20 +83,19 @@ public class Client extends PacketValidation {
                     continue;
                 }
 
-                if (i < splitMessage.length - 2)
+                if (i < splitMessage.length - 1)
                     i++;
                 else
                     break;
             }
 
-            // Send an end message
-
-            i++; // final packet
-            data = constructPacket(splitMessage[i], TCPConstants.FINAL_PACKET);
-
         } catch (java.io.IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private int generateClientPort() {
+        return (int)(Math.random() * 9999) + 1;
     }
 
 
@@ -113,7 +121,7 @@ public class Client extends PacketValidation {
 
         try {
             outputStream.write(Integer.toString(TCPConstants.VALID_PACKET).getBytes());
-            outputStream.write(Integer.toString(TCPConstants.CLIENT_PORT).getBytes());
+            outputStream.write(Integer.toString(clientPort).getBytes());
             outputStream.write(String.format("%04d", packetID).getBytes());
             outputStream.write(msg);
             outputStream.write(checkSum);
