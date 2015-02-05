@@ -6,13 +6,8 @@ import java.net.SocketException;
 
 public class Scrambler {
 
-
     private DatagramSocket serverSocket;
-    private DatagramPacket serverPacket;
-
     private DatagramSocket clientSocket;
-    private DatagramPacket clientPacket;
-
 
 
     public Scrambler() {
@@ -30,6 +25,8 @@ public class Scrambler {
     public void sendReceive() {
 
         byte[] data = new byte[TCPConstants.PACKET_SIZE];
+        DatagramPacket serverPacket;
+        DatagramPacket clientPacket;
 
         try {
             while (true) {
@@ -63,6 +60,8 @@ public class Scrambler {
         }
 
     }
+
+
 
     public static void main(String args[]) {
         Scrambler scrambler = new Scrambler();

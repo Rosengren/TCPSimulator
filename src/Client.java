@@ -15,7 +15,6 @@ public class Client {
         } catch (SocketException e) {
             e.printStackTrace();
         }
-
     }
 
 
@@ -28,7 +27,6 @@ public class Client {
         String[] splitMessage = splitStringEvery(TCPConstants.DEFAULT_MESSAGE_TO_SEND, TCPConstants.PACKET_DATA_SIZE);
 
         try {
-
             int i = 0;
             while(true) {
 
@@ -62,7 +60,6 @@ public class Client {
                     break;
             }
 
-
         } catch (java.io.IOException e) {
             e.printStackTrace();
         }
@@ -70,6 +67,10 @@ public class Client {
 
 
     /**
+     * ConstructPacket
+     *
+     * creates a byte array packet of the form:
+     *
      * Packet Structure: [ Valid | Source | id | data | checkSum ]
      */
     private byte[] constructPacket(String message, int packetID) {
@@ -100,22 +101,36 @@ public class Client {
     }
 
 
-    private String[] splitStringEvery(String s, int interval) {
-        int arrayLength = (int) Math.ceil(((s.length() / (double)interval)));
+    /**
+     * SplitStringEvery
+     *
+     * Splits a given string into specific character lengths
+     * @param stringToSplit: string to divide
+     * @param interval: number of characters per division
+     * @return String array of divided string
+     */
+    private String[] splitStringEvery(String stringToSplit, int interval) {
+        int arrayLength = (int) Math.ceil(((stringToSplit.length() / (double)interval)));
         String[] result = new String[arrayLength];
 
         int j = 0;
         int lastIndex = result.length - 1;
         for (int i = 0; i < lastIndex; i++) {
-            result[i] = s.substring(j, j + interval);
+            result[i] = stringToSplit.substring(j, j + interval);
             j += interval;
         } // Add the last bit
-        result[lastIndex] = s.substring(j);
+        result[lastIndex] = stringToSplit.substring(j);
 
         return result;
     }
 
 
+    /**
+     * invalidPacket
+     *
+     * @param data packet to verify
+     * @return true if the packet is not valid
+     */
     private boolean invalidPacket(byte[] data) {
         return data[0] == TCPConstants.INVALID_PACKET;
     }
