@@ -11,6 +11,7 @@ public class Client extends PacketValidation {
 
     private DatagramSocket clientSocket;
     private int clientPort;
+    private String message;
 
     /**
      * Constructor
@@ -23,6 +24,7 @@ public class Client extends PacketValidation {
     public Client() {
 
         try {
+            message = TCPConstants.DEFAULT_MESSAGE_TO_SEND;
             clientSocket = new DatagramSocket();
             clientSocket.setSoTimeout(TCPConstants.TIMEOUT);
             clientPort = generateClientPort();
@@ -46,7 +48,7 @@ public class Client extends PacketValidation {
         int packetID = TCPConstants.INITIAL_PACKET;
         DatagramPacket clientPacket;
 
-        String[] splitMessage = splitStringEvery(TCPConstants.DEFAULT_MESSAGE_TO_SEND, TCPConstants.PACKET_DATA_SIZE);
+        String[] splitMessage = splitStringEvery(message, TCPConstants.PACKET_DATA_SIZE);
 
         try {
             int i = 0;
@@ -133,6 +135,9 @@ public class Client extends PacketValidation {
 
     }
 
+    public void setMessageToDeliver(String message) {
+        this.message = message;
+    }
 
     /**
      * splitStringEvery
@@ -161,6 +166,11 @@ public class Client extends PacketValidation {
 
     public static void main(String args[]) {
         Client client = new Client();
+
+        if (args.length != 0) {
+            client.setMessageToDeliver(args[0]);
+        }
+
         client.sendReceive();
     }
 }
