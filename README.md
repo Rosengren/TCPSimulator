@@ -1,6 +1,5 @@
 #TCP Simulator
 ###TCP Simulation Using UDP
-simulates TCP behaviour using UDP
 
 ###Abstract
 
@@ -17,7 +16,7 @@ The <b>Scrambler</b> was responsible for simulating the transfer of data between
 
 The <b>CheckSum</b> was achieved by using a hash function called CRC32 offered by the Java utilities library. This function would take the 10 character string and return a unique hash value. When the message was sent, the recipient would run the string through the same hash function and compare the output with the hash number contained in the packet. If the values were equivalent, then the packet was not damaged.
 
-Packet Structure:
+<b>Packet Structure:</b>
 
 	Validation		: set to 0 when sent packet was invalid, set to 1 otherwise
 	Source			: client port ID
