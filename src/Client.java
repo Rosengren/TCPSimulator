@@ -1,6 +1,7 @@
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.*;
+import java.util.Random;
 
 /**
  * Client
@@ -72,7 +73,7 @@ public class Client extends PacketValidation {
                     clientPacket = new DatagramPacket(data, data.length);
                     clientSocket.receive(clientPacket);
 
-                    if (!validatePacket(data, packetID, clientPort)) {
+                    if (!validatePacket(data, packetID, clientPort) || data[0] == TCPConstants.INVALID_PACKET) {
                         System.out.println("Invalid Packet Received: Resending Packet");
                         continue;
                     }
@@ -80,7 +81,7 @@ public class Client extends PacketValidation {
                     packetID++; // send next packet
 
 
-                    System.out.println("Valid Packet Received: Sending Next Packet");
+                    System.out.println("Valid Packet Received: Sending Next Packet: " + new String(data));
                     // resend
                 } catch (SocketTimeoutException e) {
                     System.out.println("Response Timed out: Resending packet");
@@ -104,7 +105,7 @@ public class Client extends PacketValidation {
     }
 
     private int generateClientPort() {
-        return (int)(Math.random() * 9999) + 1;
+        return new Random().nextInt(9999 - 1000) + 1000;
     }
 
 

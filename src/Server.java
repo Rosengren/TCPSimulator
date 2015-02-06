@@ -67,7 +67,7 @@ public class Server extends PacketValidation {
                 data = clientPacket.getData();
 
                 if (validatePacket(data, packetNum, currentClient)) {
-                    System.out.println("Valid Packet Received");
+                    System.out.println("Valid Packet Received: " + new String(data));
 
                     // Determine if the packet was previously received or is a new one
                     Packet packet = splitPacket(data);
@@ -88,7 +88,7 @@ public class Server extends PacketValidation {
 
                     data[0] = TCPConstants.VALID_PACKET;
                 } else {
-                    System.out.println("Invalid Packet Received: " + new String(data));
+                    System.out.println("Invalid Packet Received: " + new String(data) + " - " + currentClient + " p - " + previousClient);
 
                     data[0] = TCPConstants.INVALID_PACKET;
                 }
