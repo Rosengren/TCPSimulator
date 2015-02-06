@@ -12,7 +12,7 @@ import java.util.Random;
  */
 public class Scrambler {
 
-    private static final int SCRAMBLE_MESSAGE_PROBABILITY = 40; // percentage (%)
+    private static final int SCRAMBLE_MESSAGE_PROBABILITY = 30; // percentage (%)
     private static final int LOST_PACKET_PROBABILITY = 20; // percentage (%)
 
     private DatagramSocket serverSocket;
@@ -139,6 +139,8 @@ public class Scrambler {
      */
     private byte[] shuffle(byte[] message) {
 
+        System.out.println("Scrambling Data Packet: \"" + new String(message) + "\"");
+
         Random rnd = new Random();
         for (int i = message.length - 1; i > 0; i--)
         {
@@ -149,7 +151,6 @@ public class Scrambler {
             message[i] = a;
         }
 
-        System.out.println("Scrambling Data to: \"" + new String(message) + "\"");
         return message;
     }
 

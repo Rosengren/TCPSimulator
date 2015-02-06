@@ -51,46 +51,50 @@ public class Server extends PacketValidation {
         int packetNum = TCPConstants.INITIAL_PACKET;
         DatagramPacket clientPacket;
 
+        int previousClient = -2;
 
         while(true) { // always listen for incoming messages
 
             try {
-            data = new byte[TCPConstants.PACKET_SIZE];
 
-            clientPacket = new DatagramPacket(data, data.length);
-            clientSocket.receive(clientPacket);
+                data = new byte[TCPConstants.PACKET_SIZE];
 
-            System.out.println("Received Packet " + new String(data));
+                clientPacket = new DatagramPacket(data, data.length);
+                clientSocket.receive(clientPacket);
 
-            data = clientPacket.getData();
+                System.out.println("Received Packet");
 
-            if (validatePacket(data, packetNum, currentClient)) {
-                System.out.println("Packet is good!");
+                data = clientPacket.getData();
 
-                // Determine if the packet was previously received or is a new one
-                Packet packet = splitPacket(data);
+                if (validatePacket(data, packetNum, currentClient)) {
+                    System.out.println("Valid Packet Received");
 
-                currentClient = packet.getSource();
-                if (packet.getId() == packetNum) {
-                    saveToFile(packet.getData());
-                    packetNum++;
+                    // Determine if the packet was previously received or is a new one
+                    Packet packet = splitPacket(data);
 
-                } else if (finalPacket(packet.getId())) {
-                    System.out.println("FINAL MESSAGE RECEIVED");
-                    packetNum = 1;
-                    saveToFile(packet.getData() + "<endOfMessage>\n");
-                    currentClient = TCPConstants.NO_CLIENT;
+                    currentClient = packet.getSource();
+                    if (packet.getId() == packetNum) {
+                        saveToFile(packet.getData());
+                        packetNum++;
+
+                    } else if (finalPacket(packet.getId()) && currentClient != previousClient) {
+                        System.out.println("Final Packet Received");
+                        packetNum = 1;
+                        saveToFile(packet.getData() + "<endOfMessage>\n");
+                        previousClient = currentClient;
+                        currentClient = TCPConstants.NO_CLIENT;
+
+                    }
+
+                    data[0] = TCPConstants.VALID_PACKET;
+                } else {
+                    System.out.println("Invalid Packet Received: " + new String(data));
+
+                    data[0] = TCPConstants.INVALID_PACKET;
                 }
 
-                data[0] = '1';
-            } else {
-                System.out.println("Packet is not good!");
-                // set first bit to 0;
-                data[0] = '0';
-            }
-
-            clientPacket = new DatagramPacket(data, data.length, clientPacket.getAddress(), clientPacket.getPort());
-            clientSocket.send(clientPacket);
+                clientPacket = new DatagramPacket(data, data.length, clientPacket.getAddress(), clientPacket.getPort());
+                clientSocket.send(clientPacket);
 
 
             } catch (Exception e) {
@@ -115,13 +119,15 @@ public class Server extends PacketValidation {
      * @param message to append to a file
      */
     private void saveToFile(String message) {
-        // TODO: add a delimiter between complete messages
+
         try {
             FileWriter fw = new FileWriter(FILENAME, true);
             fw.write(message);
             fw.close();
         } catch(IOException ioe) {
             System.err.println("IOException: " + ioe.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error: cannot save to file");
         }
     }
 

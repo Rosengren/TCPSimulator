@@ -26,8 +26,8 @@ public final class TCPConstants {
     public static final int PACKET_CHECKSUM   = 19;
 
 
-    public static final int VALID_PACKET = 1;
-    public static final int INVALID_PACKET = 0;
+    public static final char VALID_PACKET = '1';
+    public static final char INVALID_PACKET = '0';
 
     public static final String DEFAULT_MESSAGE_TO_SEND = "I Can't Believe this is not butter";
 

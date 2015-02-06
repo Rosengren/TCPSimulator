@@ -56,7 +56,7 @@ public class Client extends PacketValidation {
 
                 if (i == splitMessage.length - 1) {// final packet
                     data = constructPacket(splitMessage[i], TCPConstants.FINAL_PACKET); // send end message
-                    System.out.println("FINAL MESSAGE SENT");
+                    System.out.println("Sending Final Packet");
                 } else
                     data = constructPacket(splitMessage[i], packetID);
 
@@ -65,23 +65,22 @@ public class Client extends PacketValidation {
                 clientSocket.send(clientPacket);
 
                 try {
-                    System.out.println("Sent: " + new String(clientPacket.getData()));
+                    System.out.println("Sending Packet: " + new String(data));
                     clientPacket = new DatagramPacket(data, data.length);
                     clientSocket.receive(clientPacket);
 
-                    System.out.println("Received packet: "  + new String(data));
                     if (!validatePacket(data, packetID, clientPort)) {
-                        System.out.println("Invalid Packet: Resending Message");
+                        System.out.println("Invalid Packet Received: Resending Packet");
                         continue;
                     }
 
                     packetID++; // send next packet
 
 
-                    System.out.println("Sending Next Message");
+                    System.out.println("Valid Packet Received: Sending Next Packet");
                     // resend
                 } catch (SocketTimeoutException e) {
-                    System.out.println("Response Timed out: Resending Message");
+                    System.out.println("Response Timed out: Resending packet");
                     continue;
                 }
 
@@ -122,7 +121,7 @@ public class Client extends PacketValidation {
         byte[] checkSum = String.format("%10d", generateCRC32(new String(msg))).getBytes();
 
         try {
-            outputStream.write(Integer.toString(TCPConstants.VALID_PACKET).getBytes());
+            outputStream.write((byte)TCPConstants.VALID_PACKET);
             outputStream.write(Integer.toString(clientPort).getBytes());
             outputStream.write(String.format("%04d", packetID).getBytes());
             outputStream.write(msg);
