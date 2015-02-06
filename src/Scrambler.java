@@ -96,6 +96,9 @@ public class Scrambler {
 
         }
 
+        clientSocket.close();
+        serverSocket.close();
+
 
     }
 

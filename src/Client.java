@@ -50,9 +50,11 @@ public class Client extends PacketValidation {
 
         String[] splitMessage = splitStringEvery(message, TCPConstants.PACKET_DATA_SIZE);
 
-        try {
-            int i = 0;
-            while(true) {
+
+        int i = 0;
+        while(true) {
+
+            try {
 
                 if (i == splitMessage.length - 1) {// final packet
                     data = constructPacket(splitMessage[i], TCPConstants.FINAL_PACKET); // send end message
@@ -65,6 +67,7 @@ public class Client extends PacketValidation {
                 clientSocket.send(clientPacket);
 
                 try {
+
                     System.out.println("Sending Packet: " + new String(data));
                     clientPacket = new DatagramPacket(data, data.length);
                     clientSocket.receive(clientPacket);
@@ -88,11 +91,16 @@ public class Client extends PacketValidation {
                     i++;
                 else
                     break;
-            }
 
-        } catch (java.io.IOException e) {
-            e.printStackTrace();
+            } catch (java.io.IOException e) {
+                System.out.println("Error: IO Exception");
+                e.printStackTrace();
+                break;
+
+            }
         }
+
+        clientSocket.close();
     }
 
     private int generateClientPort() {
@@ -121,7 +129,7 @@ public class Client extends PacketValidation {
         byte[] checkSum = String.format("%10d", generateCRC32(new String(msg))).getBytes();
 
         try {
-            outputStream.write((byte)TCPConstants.VALID_PACKET);
+            outputStream.write((byte) TCPConstants.VALID_PACKET);
             outputStream.write(Integer.toString(clientPort).getBytes());
             outputStream.write(String.format("%04d", packetID).getBytes());
             outputStream.write(msg);
